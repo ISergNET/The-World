@@ -1,5 +1,5 @@
 {
   "Data": {
-    "WorldContextConnection": "Server=(LocalDB)\\MSSQLLocalDB;Database=TheWorldDb;Trusted_Connection=true;MultipleActiveResultSets=true"
+    "WorldContextConnection": "Server=(LocalDb)\\v11.0;Database=WorldDb;Trusted_Connection=true;MultipleActiveResultSets=true"
   }	
 }

@@ -20,7 +20,7 @@ namespace The_World.Controllers.Web
 
         public IActionResult Index()
         {
-            var trips = _context.GetAllTripsWthStops();
+            var trips = _context.GetAllTrips();
 
             return View(trips);
         }
