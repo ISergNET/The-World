@@ -5,23 +5,46 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Http;
+using Microsoft.Data.Entity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.PlatformAbstractions;
+using The_World.Models;
 using The_World.Services;
 
 namespace The_World
 {
     public class Startup
     {
+        public static IConfigurationRoot Configuration;
+
+        public Startup(IApplicationEnvironment env)
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ApplicationBasePath)
+                .AddJsonFile("config.json")
+                .AddEnvironmentVariables();
+
+            Configuration = builder.Build();
+        }
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            services.AddEntityFramework()
+                .AddSqlServer()
+                .AddDbContext<WorldContext>();
+            services.AddTransient<WorldContextSeedData>();
+            services.AddScoped<IWorldRepository, WorldRepository>();
+
             services.AddScoped<IMailService, DebugMailService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, WorldContextSeedData seeder)
         {
             //app.UseIISPlatformHandler();
             app.UseStaticFiles();
@@ -30,6 +53,8 @@ namespace The_World
                 name: "Default",
                 template: "{controller}/{action}/{id?}",
                 defaults: new { controller = "App", action = "Index" }));
+
+            seeder.EnsureSeedData();
 
             //app.Run(async (context) =>
             //{
