@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Http;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
+using Newtonsoft.Json.Serialization;
 using The_World.Models;
 using The_World.Services;
 
@@ -32,7 +34,11 @@ namespace The_World
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvc()
+                .AddJsonOptions(opt =>
+                {
+                    opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                });
 
             services.AddLogging();
 
@@ -44,6 +50,8 @@ namespace The_World
 
             services.AddScoped<IMailService, DebugMailService>();
 
+            //services.addm
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,6 +60,8 @@ namespace The_World
             loggerFactory.AddDebug(LogLevel.Warning);
             //app.UseIISPlatformHandler();
             app.UseStaticFiles();
+
+            Mapper.Initialize(config => config.CreateMap<Trip, TripViewModel>().ReverseMap());
 
             app.UseMvc(config => config.MapRoute(
                 name: "Default",
