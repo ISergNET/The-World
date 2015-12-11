@@ -55,9 +55,26 @@ namespace The_World.Models
             _context.Add(newTrip);
         }
 
-        public bool SaveAll()
+        public bool SaveAll() => _context.SaveChanges() > 0;
+
+        public Trip GetTripByName(string tripName) => _context.Trips.Include(x => x.Stops).FirstOrDefault(x => x.Name == tripName);
+
+        public void AddStop(string tripName, Stop newStop)
         {
-            return _context.SaveChanges() > 0;
+            Trip trip = GetTripByName(tripName);
+            if (trip == null) throw new NullReferenceException($"Couldn't find a trip {tripName}");
+            try
+            {
+                newStop.Order = trip.Stops.Max(x => x.Order) + 1;
+
+            }
+            catch (Exception)
+            {
+
+                newStop.Order = 0;
+            }
+            trip.Stops.Add(newStop);
+            _context.Stops.Add(newStop);
         }
     }
 }

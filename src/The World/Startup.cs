@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
 using Newtonsoft.Json.Serialization;
+using The_World.Controllers.Api;
 using The_World.Models;
 using The_World.Services;
 
@@ -61,7 +62,11 @@ namespace The_World
             //app.UseIISPlatformHandler();
             app.UseStaticFiles();
 
-            Mapper.Initialize(config => config.CreateMap<Trip, TripViewModel>().ReverseMap());
+            Mapper.Initialize(config =>
+            {
+                config.CreateMap<Trip, TripViewModel>().ReverseMap();
+                config.CreateMap<Stop, StopViewModel>().ReverseMap();
+            });
 
             app.UseMvc(config => config.MapRoute(
                 name: "Default",
