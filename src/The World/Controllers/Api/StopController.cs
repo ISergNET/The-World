@@ -7,6 +7,7 @@ using AutoMapper;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Extensions.Logging;
 using The_World.Models;
+using The_World.Services;
 
 namespace The_World.Controllers.Api
 {
@@ -15,11 +16,13 @@ namespace The_World.Controllers.Api
     {
         private readonly IWorldRepository _repository;
         private readonly ILogger<StopController> _logger;
+        private readonly CoordService _coordService;
 
-        public StopController(IWorldRepository repository, ILogger<StopController> logger)
+        public StopController(IWorldRepository repository, ILogger<StopController> logger, CoordService coordService)
         {
             _repository = repository;
             _logger = logger;
+            _coordService = coordService;
         }
 
         [HttpGet("")]
@@ -46,7 +49,7 @@ namespace The_World.Controllers.Api
         }
 
         [HttpPost("")]
-        public JsonResult Post(string tripName, [FromBody]StopViewModel vm)
+        public async Task<JsonResult> Post(string tripName, [FromBody]StopViewModel vm)
         {
             try
             {
@@ -56,6 +59,16 @@ namespace The_World.Controllers.Api
                     var newStop = Mapper.Map<Stop>(vm);
 
                     //looking up geolocation
+                    CoordServiceResult result = await _coordService.Lookup(newStop.Name);
+
+                    if (!result.Success)
+                    {
+                        Response.StatusCode = (int) HttpStatusCode.BadRequest;
+                        return Json(result.Message);
+                    }
+
+                    newStop.Latitude = result.Latitude;
+                    newStop.Longitude = result.Longitude;
 
                     //save entity
                     _repository.AddStop(tripName, newStop);
